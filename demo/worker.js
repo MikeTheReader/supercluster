@@ -9,17 +9,14 @@ var now = Date.now();
 
 var index;
 
-getJSON('../test/fixtures/places.json', function (geojson) {
-    console.log('loaded ' + geojson.length + ' points JSON in ' + ((Date.now() - now) / 1000) + 's');
+getJSON('../test/fixtures/places_2.json', function (geojson) {
 
     index = supercluster({
-        log: true,
+        log: false,
         radius: 60,
         extent: 256,
         maxZoom: 17
     }).load(geojson.features);
-
-    console.log(index.getTile(0, 0, 0));
 
     postMessage({ready: true});
 });

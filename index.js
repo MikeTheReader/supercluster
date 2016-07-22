@@ -1,6 +1,7 @@
 'use strict';
 
 var kdbush = require('kdbush');
+var hull = require('hull.js')
 
 module.exports = supercluster;
 
@@ -135,6 +136,7 @@ SuperCluster.prototype = {
 
             var foundNeighbors = false;
             var numPoints = p.numPoints;
+            var pointCoords = p.pointCoords;
             var wx = p.x * numPoints;
             var wy = p.y * numPoints;
 
@@ -147,29 +149,31 @@ SuperCluster.prototype = {
                     wx += b.x * b.numPoints; // accumulate coordinates for calculating weighted center
                     wy += b.y * b.numPoints;
                     numPoints += b.numPoints;
+                    pointCoords = pointCoords.concat(b.pointCoords);
                 }
             }
 
-            clusters.push(foundNeighbors ? createCluster(wx / numPoints, wy / numPoints, numPoints, -1) : p);
+            clusters.push(foundNeighbors ? createCluster(wx / numPoints, wy / numPoints, numPoints, -1, pointCoords) : p);
         }
 
         return clusters;
     }
 };
 
-function createCluster(x, y, numPoints, id) {
+function createCluster(x, y, numPoints, id, pointCoords) {
     return {
         x: x, // weighted cluster center
         y: y,
         zoom: Infinity, // the last zoom the cluster was processed at
         id: id, // index of the source feature in the original input array
-        numPoints: numPoints
+        numPoints: numPoints,
+        pointCoords: pointCoords
     };
 }
 
 function createPointCluster(p, i) {
     var coords = p.geometry.coordinates;
-    return createCluster(lngX(coords[0]), latY(coords[1]), 1, i);
+    return createCluster(lngX(coords[0]), latY(coords[1]), 1, i, [coords]);
 }
 
 function getClusterJSON(cluster) {
@@ -179,8 +183,13 @@ function getClusterJSON(cluster) {
         geometry: {
             type: 'Point',
             coordinates: [xLng(cluster.x), yLat(cluster.y)]
-        }
+        },
+        extent: _getExtent(cluster.pointCoords)
     };
+}
+
+function _getExtent(pointCoords) {
+    return hull(pointCoords, .5);
 }
 
 function getClusterProperties(cluster) {
