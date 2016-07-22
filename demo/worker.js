@@ -9,7 +9,7 @@ var now = Date.now();
 
 var index;
 
-getJSON('../test/fixtures/places_2.json', function (geojson) {
+getJSON('../test/fixtures/places.json', function (geojson) {
 
     index = supercluster({
         log: false,
