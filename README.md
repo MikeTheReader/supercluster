@@ -11,6 +11,6 @@ index.load(points);
 index.getClusters([-180, -85, 180, 85], 2);
 ```
 
-Clustering 6 million points in Leaflet:
+Modified to add convex hulls to the clusters, allowing display of that as the marker, rather than a point.
 
-![clusters2](https://cloud.githubusercontent.com/assets/25395/11857351/43407b46-a40c-11e5-8662-e99ab1cd2cb7.gif)
+Demo still needs work as far as coloring by density, and some better labeling.
