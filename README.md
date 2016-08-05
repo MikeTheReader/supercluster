@@ -2,15 +2,8 @@
 
 A very fast JavaScript library for geospatial point clustering for browsers and Node. _A work in progress._
 
-```js
-var index = supercluster({
-    radius: 40,
-    maxZoom: 16
-});
-index.load(points);
-index.getClusters([-180, -85, 180, 85], 2);
-```
+Modified to add rectangular extents to the clusters.
 
-Modified to add convex hulls to the clusters, allowing display of that as the marker, rather than a point.
+In order to create an importable module, run the following command:
 
-Demo still needs work as far as coloring by density, and some better labeling.
+`browserify index.js --standalone supercluster -g uglifyify > {output-file}`

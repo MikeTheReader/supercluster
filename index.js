@@ -160,25 +160,27 @@ SuperCluster.prototype = {
     }
 };
 
-function createCluster(x, y, numPoints, id, pointCoords) {
+function createCluster(x, y, numPoints, id, pointCoords, attributes) {
     return {
         x: x, // weighted cluster center
         y: y,
         zoom: Infinity, // the last zoom the cluster was processed at
         id: id, // index of the source feature in the original input array
         numPoints: numPoints,
-        pointCoords: pointCoords
+        pointCoords: pointCoords,
+        attributes: attributes
     };
 }
 
 function createPointCluster(p, i) {
     var coords = p.geometry.coordinates;
-    return createCluster(lngX(coords[0]), latY(coords[1]), 1, i, [coords]);
+    return createCluster(lngX(coords[0]), latY(coords[1]), 1, i, [coords], p.attributes);
 }
 
 function getClusterJSON(cluster) {
     return {
         type: 'Feature',
+        attributes: cluster.attributes,
         properties: getClusterProperties(cluster),
         geometry: {
             type: 'Point',
@@ -189,7 +191,13 @@ function getClusterJSON(cluster) {
 }
 
 function _getExtent(pointCoords) {
-    return hull(pointCoords, .5);
+    var xValues = pointCoords.map(function(point) { return point[0] });
+    var yValues = pointCoords.map(function(point) { return point[1] });
+    var maxx = Math.max.apply(null, xValues);
+    var minx = Math.min.apply(null, xValues);
+    var maxy = Math.max.apply(null, yValues);
+    var miny = Math.min.apply(null, yValues);
+    return [minx, miny, maxx, maxy];
 }
 
 function getClusterProperties(cluster) {
