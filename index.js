@@ -1,7 +1,8 @@
 'use strict';
 
 var kdbush = require('kdbush');
-var hull = require('hull.js')
+var hull = require('hull.js');
+var WORLD_WIDTH_IN_METERS = 40075016.68;
 
 module.exports = supercluster;
 
@@ -61,7 +62,8 @@ SuperCluster.prototype = {
 
     getClusters: function (bbox, zoom) {
         var tree = this.trees[this._limitZoom(zoom)];
-        var ids = tree.range(lngX(bbox[0]), latY(bbox[3]), lngX(bbox[2]), latY(bbox[1]));
+
+        var ids = tree.range(comparableX(bbox[0]), comparableY(bbox[1]), comparableX(bbox[2]), comparableY(bbox[3]));
         var clusters = [];
         for (var i = 0; i < ids.length; i++) {
             var c = tree.points[ids[i]];
@@ -174,7 +176,7 @@ function createCluster(x, y, numPoints, id, pointCoords, attributes) {
 
 function createPointCluster(p, i) {
     var coords = p.geometry.coordinates;
-    return createCluster(lngX(coords[0]), latY(coords[1]), 1, i, [coords], p.attributes);
+    return createCluster(comparableX(coords[0]), comparableY(coords[1]), 1, i, [coords], p.attributes);
 }
 
 function getClusterJSON(cluster) {
@@ -184,7 +186,7 @@ function getClusterJSON(cluster) {
         properties: getClusterProperties(cluster),
         geometry: {
             type: 'Point',
-            coordinates: [xLng(cluster.x), yLat(cluster.y)]
+            coordinates: [mercatorX(cluster.x), mercatorY(cluster.y)]
         },
         extent: _getExtent(cluster.pointCoords)
     };
@@ -211,24 +213,20 @@ function getClusterProperties(cluster) {
     };
 }
 
-// longitude/latitude to spherical mercator in [0..1] range
-function lngX(lng) {
-    return lng / 360 + 0.5;
+// spherical mercator in [0..1] range
+function comparableX(lng) {
+    return (lng / WORLD_WIDTH_IN_METERS) + .5;
 }
-function latY(lat) {
-    var sin = Math.sin(lat * Math.PI / 180),
-        y = (0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI);
-    return y < 0 ? 0 :
-           y > 1 ? 1 : y;
+function comparableY(lat) {
+    return (lat / WORLD_WIDTH_IN_METERS) + .5;
 }
 
 // spherical mercator to longitude/latitude
-function xLng(x) {
-    return (x - 0.5) * 360;
+function mercatorX(x) {
+    return (x - .5) * WORLD_WIDTH_IN_METERS;
 }
-function yLat(y) {
-    var y2 = (180 - y * 360) * Math.PI / 180;
-    return 360 * Math.atan(Math.exp(y2)) / Math.PI - 90;
+function mercatorY(y) {
+    return (y - .5) * WORLD_WIDTH_IN_METERS;
 }
 
 function extend(dest, src) {

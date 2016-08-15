@@ -2,7 +2,8 @@
 
 A very fast JavaScript library for geospatial point clustering for browsers and Node. _A work in progress._
 
-Modified to add rectangular extents to the clusters.
+Modified to add rectangular extents to the clusters. This version also accepts web mercator coordinates
+instead of lat/long.
 
 In order to create an importable module, run the following command:
 
